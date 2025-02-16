@@ -55,13 +55,36 @@ def speech_to_text(audio_binary):
     # Parse the response to get our transcribed text
     text = 'null'
     while bool(response.get('results')):
-        print('Speech-to-Text response:', response)
+        print('Speech-to-Text response:', response) # Ver toda la estructura
+        print("Cantidad de resultados:", len(response.get('results', [])))  # Ver cuántos devuelve
         text = response.get('results').pop().get('alternatives').pop().get('transcript')
         print('recognised text: ', text)
         return text
 
 def text_to_speech(text, voice=""):
-    return None
+    # Configurar la URL de la API HTTP de Watson Texto a Voz
+    base_url = 'https://sn-watson-tts.labs.skills.network'
+    api_url = base_url + '/text-to-speech/api/v1/synthesize?output=output_text.wav'
+
+    # Agregar el parámetro de voz en api_url si el usuario ha seleccionado una voz preferida
+    if voice != "" and voice != "default":
+        api_url += "&voice=" + voice
+
+    # Configurar los encabezados para nuestra solicitud HTTP
+    headers = {
+        'Accept': 'audio/wav',
+        'Content-Type': 'application/json',
+    }
+
+    # Establecer el cuerpo de nuestra solicitud HTTP
+    json_data = {
+        'text': text,
+    }
+
+    # Enviar una solicitud HTTP Post al Servicio de Texto a Voz de Watson
+    response = requests.post(api_url, headers=headers, json=json_data)
+    print('Respuesta de Texto a Voz:', response)
+    return response.content
 
 def watsonx_process_message(user_message):
     # Establecer el prompt para la API de Watsonx
